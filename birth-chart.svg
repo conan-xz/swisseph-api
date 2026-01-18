@@ -1,0 +1,236 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" id="chart">
+  <title>Birth Chart</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5"
+        markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+    <g id="dot">
+      <circle cx="0" cy="0" r="1.2"/>
+    </g>
+  </defs>
+  <g id="main">
+    <g id="chartbody">
+      <circle cx="300" cy="300" r="255" fill="none" stroke="#ccc" stroke-width="1"/>
+      <circle cx="300" cy="300" r="210" fill="none" stroke="#999" stroke-width="1"/>
+      <circle cx="300" cy="300" r="186" fill="none" stroke="#ccc" stroke-width="1"/>
+      <circle cx="300" cy="300" r="146" fill="none" stroke="#eee" stroke-width="1"/>
+    </g><g id="zodiac">
+      <path d="M 300,45 L 300,90 A 210,210 0 0,1 405,118.13466520526791 L 427.5,79.16352203496817 A 255,255 0 0,0 300,45"
+            fill="#f9f9f9" stroke="#ddd" stroke-width="0.5"/>
+      <text x="360.1754279863361" y="75.4222453877916"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="20" font-family="serif">♈</text>
+      <path d="M 427.5,79.16352203496817 L 405,118.13466520526791 A 210,210 0 0,1 481.8653347947321,195 L 520.8364779650319,172.5 A 255,255 0 0,0 427.5,79.16352203496817"
+            fill="#fff" stroke="#ddd" stroke-width="0.5"/>
+      <text x="464.4023266258723" y="135.5976733741277"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="20" font-family="serif">♉</text>
+      <path d="M 520.8364779650319,172.5 L 481.8653347947321,195 A 210,210 0 0,1 510,300 L 555,300 A 255,255 0 0,0 520.8364779650319,172.5"
+            fill="#f9f9f9" stroke="#ddd" stroke-width="0.5"/>
+      <text x="524.5777546122084" y="239.82457201366392"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="20" font-family="serif">♊</text>
+      <path d="M 555,300 L 510,300 A 210,210 0 0,1 481.8653347947321,405 L 520.8364779650319,427.5 A 255,255 0 0,0 555,300"
+            fill="#fff" stroke="#ddd" stroke-width="0.5"/>
+      <text x="524.5777546122084" y="360.1754279863361"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="20" font-family="serif">♋</text>
+      <path d="M 520.8364779650319,427.5 L 481.8653347947321,405 A 210,210 0 0,1 405,481.8653347947321 L 427.5,520.8364779650318 A 255,255 0 0,0 520.8364779650319,427.5"
+            fill="#f9f9f9" stroke="#ddd" stroke-width="0.5"/>
+      <text x="464.4023266258723" y="464.4023266258723"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="20" font-family="serif">♌</text>
+      <path d="M 427.5,520.8364779650318 L 405,481.8653347947321 A 210,210 0 0,1 300,510 L 300,555 A 255,255 0 0,0 427.5,520.8364779650318"
+            fill="#fff" stroke="#ddd" stroke-width="0.5"/>
+      <text x="360.1754279863361" y="524.5777546122084"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="20" font-family="serif">♍</text>
+      <path d="M 300,555 L 300,510 A 210,210 0 0,1 195.00000000000006,481.8653347947321 L 172.50000000000006,520.8364779650319 A 255,255 0 0,0 300,555"
+            fill="#f9f9f9" stroke="#ddd" stroke-width="0.5"/>
+      <text x="239.8245720136639" y="524.5777546122084"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="20" font-family="serif">♎</text>
+      <path d="M 172.50000000000006,520.8364779650319 L 195.00000000000006,481.8653347947321 A 210,210 0 0,1 118.13466520526788,405 L 79.16352203496814,427.5 A 255,255 0 0,0 172.50000000000006,520.8364779650319"
+            fill="#fff" stroke="#ddd" stroke-width="0.5"/>
+      <text x="135.5976733741277" y="464.4023266258723"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="20" font-family="serif">♏</text>
+      <path d="M 79.16352203496814,427.5 L 118.13466520526788,405 A 210,210 0 0,1 90,300 L 45,300.00000000000006 A 255,255 0 0,0 79.16352203496814,427.5"
+            fill="#f9f9f9" stroke="#ddd" stroke-width="0.5"/>
+      <text x="75.42224538779163" y="360.17542798633616"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="20" font-family="serif">♐</text>
+      <path d="M 45,300.00000000000006 L 90,300 A 210,210 0 0,1 118.13466520526791,194.99999999999997 L 79.16352203496817,172.49999999999997 A 255,255 0 0,0 45,300.00000000000006"
+            fill="#fff" stroke="#ddd" stroke-width="0.5"/>
+      <text x="75.4222453877916" y="239.824572013664"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="20" font-family="serif">♑</text>
+      <path d="M 79.16352203496817,172.49999999999997 L 118.13466520526791,194.99999999999997 A 210,210 0 0,1 194.9999999999999,118.13466520526791 L 172.4999999999999,79.1635220349682 A 255,255 0 0,0 79.16352203496817,172.49999999999997"
+            fill="#f9f9f9" stroke="#ddd" stroke-width="0.5"/>
+      <text x="135.59767337412765" y="135.5976733741277"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="20" font-family="serif">♒</text>
+      <path d="M 172.4999999999999,79.1635220349682 L 194.9999999999999,118.13466520526791 A 210,210 0 0,1 299.99999999999994,90 L 299.99999999999994,45 A 255,255 0 0,0 172.4999999999999,79.1635220349682"
+            fill="#fff" stroke="#ddd" stroke-width="0.5"/>
+      <text x="239.82457201366395" y="75.4222453877916"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="20" font-family="serif">♓</text></g><g id="cuspids">
+        <line x1="192.44148539759027" y1="119.63601818399769" x2="279.5126638852553" y2="265.644955844571"
+              stroke="#333" stroke-width="2"/>
+        <text x="265.16972754992554" y="227.98019632730464"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="14" fill="#666">1</text>
+        <line x1="397.0345478779576" y1="113.76279502172409" x2="341.58623480483897" y2="220.18405500931033"
+              stroke="#999" stroke-width="1"/>
+        <text x="343.00835963995445" y="232.54422929741048"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="14" fill="#666">2</text>
+        <line x1="477.3829385994745" y1="187.59318039453717" x2="376.0212593997748" y2="251.82564874051593"
+              stroke="#999" stroke-width="1"/>
+        <text x="371.04946393041763" y="263.2308053501265"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="14" fill="#666">3</text>
+        <line x1="505.0721813812281" y1="254.77389665752" x2="387.88807773481204" y2="280.6173842817943"
+              stroke="#999" stroke-width="1"/>
+        <text x="379.32706074151787" y="289.64541482668017"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="14" fill="#666">4</text>
+        <line x1="509.1762394684399" y1="318.58227224646805" x2="389.64695977218855" y2="307.963830962772"
+              stroke="#999" stroke-width="1"/>
+        <text x="378.76598437548535" y="313.99713204055723"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="14" fill="#666">5</text>
+        <line x1="490.03730831762107" y1="389.3634234314769" x2="381.4445607075519" y2="338.2986100420615"
+              stroke="#999" stroke-width="1"/>
+        <text x="369.15261845409395" y="340.22331862169636"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="14" fill="#666">6</text>
+        <line x1="407.55851460240973" y1="480.3639818160023" x2="346.0965062581756" y2="377.2988493497153"
+              stroke="#999" stroke-width="1"/>
+        <text x="334.8302724500744" y="372.0198036726954"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="14" fill="#666">7</text>
+        <line x1="202.96545212204242" y1="486.23720497827594" x2="258.41376519516103" y2="379.8159449906897"
+              stroke="#999" stroke-width="1"/>
+        <text x="256.99164036004555" y="367.4557707025895"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="14" fill="#666">8</text>
+        <line x1="122.61706140052556" y1="412.4068196054629" x2="223.97874060022525" y2="348.17435125948407"
+              stroke="#999" stroke-width="1"/>
+        <text x="228.95053606958237" y="336.7691946498735"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="14" fill="#666">9</text>
+        <line x1="94.92781861877194" y1="345.2261033424801" x2="260.9386321178613" y2="308.6144958747581"
+              stroke="#333" stroke-width="2"/>
+        <text x="220.67293925848213" y="310.35458517331983"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="14" fill="#666">10</text>
+        <line x1="90.82376053156005" y1="281.4177277535319" x2="210.35304022781145" y2="292.036169037228"
+              stroke="#999" stroke-width="1"/>
+        <text x="221.23401562451463" y="286.00286795944277"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="14" fill="#666">11</text>
+        <line x1="109.96269168237893" y1="210.63657656852314" x2="218.5554392924481" y2="261.7013899579385"
+              stroke="#999" stroke-width="1"/>
+        <text x="230.84738154590605" y="259.77668137830364"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="14" fill="#666">12</text></g><g id="aspects">
+          <line x1="448.3353568138677" y1="285.9421936667716" x2="279.3892365908781" y2="152.43240046780863"
+                stroke="#f00" stroke-width="0.5" opacity="0.6"/>
+          <line x1="279.3892365908781" y1="152.43240046780863" x2="413.0306268312629" y2="202.91716218542126"
+                stroke="#090" stroke-width="0.5" opacity="0.6"/>
+          <line x1="279.3892365908781" y1="152.43240046780863" x2="443.23298629444474" y2="341.0525472678055"
+                stroke="#00f" stroke-width="0.5" opacity="0.6"/>
+          <line x1="279.3892365908781" y1="152.43240046780863" x2="163.885847250591" y2="239.38698637000007"
+                stroke="#090" stroke-width="0.5" opacity="0.6"/>
+          <line x1="279.3892365908781" y1="152.43240046780863" x2="193.92276257853996" y2="404.63565215083815"
+                stroke="#00f" stroke-width="0.5" opacity="0.6"/>
+          <line x1="436.65946174116465" y1="240.62667672586318" x2="329.4141952613289" y2="153.93219000365477"
+                stroke="#090" stroke-width="0.5" opacity="0.6"/>
+          <line x1="413.0306268312629" y1="202.91716218542126" x2="443.23298629444474" y2="341.0525472678055"
+                stroke="#090" stroke-width="0.5" opacity="0.6"/>
+          <line x1="413.0306268312629" y1="202.91716218542126" x2="163.885847250591" y2="239.38698637000007"
+                stroke="#00f" stroke-width="0.5" opacity="0.6"/>
+          <line x1="413.0306268312629" y1="202.91716218542126" x2="155.2423626274699" y2="264.69806772536276"
+                stroke="#00f" stroke-width="0.5" opacity="0.6"/>
+          <line x1="413.0306268312629" y1="202.91716218542126" x2="193.92276257853996" y2="404.63565215083815"
+                stroke="#666" stroke-width="0.5" opacity="0.6"/>
+          <line x1="329.4141952613289" y1="153.93219000365477" x2="443.23298629444474" y2="341.0525472678055"
+                stroke="#f00" stroke-width="0.5" opacity="0.6"/>
+          <line x1="329.4141952613289" y1="153.93219000365477" x2="152.50362128437587" y2="278.88559103888576"
+                stroke="#f00" stroke-width="0.5" opacity="0.6"/>
+          <line x1="329.4141952613289" y1="153.93219000365477" x2="155.2423626274699" y2="264.69806772536276"
+                stroke="#f00" stroke-width="0.5" opacity="0.6"/>
+          <line x1="443.23298629444474" y1="341.0525472678055" x2="152.50362128437587" y2="278.88559103888576"
+                stroke="#666" stroke-width="0.5" opacity="0.6"/>
+          <line x1="443.23298629444474" y1="341.0525472678055" x2="155.2423626274699" y2="264.69806772536276"
+                stroke="#666" stroke-width="0.5" opacity="0.6"/>
+          <line x1="443.23298629444474" y1="341.0525472678055" x2="193.92276257853996" y2="404.63565215083815"
+                stroke="#00f" stroke-width="0.5" opacity="0.6"/>
+          <line x1="152.50362128437587" y1="278.88559103888576" x2="155.2423626274699" y2="264.69806772536276"
+                stroke="#000" stroke-width="0.5" opacity="0.6"/>
+          <line x1="155.2423626274699" y1="264.69806772536276" x2="193.92276257853996" y2="404.63565215083815"
+                stroke="#090" stroke-width="0.5" opacity="0.6"/></g><g id="planets">
+        <line x1="428.4245706643552" y1="287.8291475370036" x2="448.3353568138677" y2="285.9421936667716"
+              stroke="#333" stroke-width="1"/>
+        <use href="#dot" x="448.3353568138677" y="285.9421936667716" class="dot Sun"/>
+        <text x="418.46917758959904" y="288.7726244721196"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="16" font-family="serif">☉</text>
+        <line x1="282.15578201492133" y1="172.2401319486397" x2="279.3892365908781" y2="152.43240046780863"
+              stroke="#333" stroke-width="1"/>
+        <use href="#dot" x="279.3892365908781" y="152.43240046780863" class="dot Moon"/>
+        <text x="283.53905472694294" y="182.14399768905523"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="16" font-family="serif">☽</text>
+        <line x1="418.3159098295989" y1="248.59625031970705" x2="436.65946174116465" y2="240.62667672586318"
+              stroke="#333" stroke-width="1"/>
+        <use href="#dot" x="436.65946174116465" y="240.62667672586318" class="dot Mercury"/>
+        <text x="409.14413387381603" y="252.58103711662898"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="16" font-family="serif">☿</text>
+        <line x1="397.85873061230143" y1="215.9484155833513" x2="413.0306268312629" y2="202.91716218542126"
+              stroke="#333" stroke-width="1"/>
+        <use href="#dot" x="413.0306268312629" y="202.91716218542126" class="dot Venus"/>
+        <text x="390.2727825028207" y="222.4640422823163"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="16" font-family="serif">♀</text>
+        <line x1="325.46598113229146" y1="173.53860745282861" x2="329.4141952613289" y2="153.93219000365477"
+              stroke="#333" stroke-width="1"/>
+        <use href="#dot" x="329.4141952613289" y="153.93219000365477" class="dot Mars"/>
+        <text x="323.49187406777276" y="183.34181617741552"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="16" font-family="serif">♂</text>
+        <line x1="424.0070820938481" y1="335.5421382385698" x2="443.23298629444474" y2="341.0525472678055"
+              stroke="#333" stroke-width="1"/>
+        <use href="#dot" x="443.23298629444474" y="341.0525472678055" class="dot Jupiter"/>
+        <text x="414.3941299935498" y="332.786933723952"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="16" font-family="serif">♃</text>
+        <line x1="182.15620332433718" y1="247.52296135389267" x2="163.885847250591" y2="239.38698637000007"
+              stroke="#333" stroke-width="1"/>
+        <use href="#dot" x="163.885847250591" y="239.38698637000007" class="dot Saturn"/>
+        <text x="191.29138136121026" y="251.59094884583897"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="16" font-family="serif">♄</text>
+        <line x1="172.30179292405694" y1="281.71973989272664" x2="152.50362128437587" y2="278.88559103888576"
+              stroke="#333" stroke-width="1"/>
+        <use href="#dot" x="152.50362128437587" y="278.88559103888576" class="dot Uranus"/>
+        <text x="182.2008787438975" y="283.13681431964704"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="16" font-family="serif">♅</text>
+        <line x1="174.67291797948735" y1="269.43658212464294" x2="155.2423626274699" y2="264.69806772536276"
+              stroke="#333" stroke-width="1"/>
+        <use href="#dot" x="155.2423626274699" y="264.69806772536276" class="dot Neptune"/>
+        <text x="184.38819565549608" y="271.805839324283"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="16" font-family="serif">♆</text>
+        <line x1="208.1613179371252" y1="390.5905981708599" x2="193.92276257853996" y2="404.63565215083815"
+              stroke="#333" stroke-width="1"/>
+        <use href="#dot" x="193.92276257853996" y="404.63565215083815" class="dot Pluto"/>
+        <text x="215.28059561641783" y="383.56807118087073"
+              text-anchor="middle" dominant-baseline="middle"
+              font-size="16" font-family="serif">♇</text></g>
+  </g>
+</svg>
