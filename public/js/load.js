@@ -7,7 +7,7 @@ window.addEventListener ('keypress', function (event) {
 	}
 });
 
-var socket = io.connect('http://swisseph.com');
+var socket = io.connect('http://localhost:3000');
 
 jQuery ('#gt-date').datetimepicker ({
 	value: (new Date ()).dateFormat ('d.m.Y H:i:s'),

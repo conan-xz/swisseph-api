@@ -27,12 +27,15 @@
     "morgan": "~1.5.1",
     "serve-favicon": "~2.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "socket.io-client": "^4.8.1"
+  },
   "optionalDependencies": {},
   "engines": {
     "node": ">=0.12"
   },
   "scripts": {
-    "start": "node ./bin/server"
+    "start": "node ./bin/server",
+    "test": "node test-api.js"
   }
 }
