@@ -1,144 +1,21 @@
 /**
- * Swiss Ephemeris API Test Script
+ * Swiss Ephemeris API - Birth Chart Generator
  *
  * Usage:
- *   node test-api.js [url] [options]
+ *   node test-api.js [url]
  *
  * Examples:
  *   node test-api.js                          # Test localhost:3000
  *   node test-api.js http://localhost:3000
  *   node test-api.js https://your-service.cloudurl.cn
- *   node test-api.js --birth-chart            # Generate birth chart SVG
- *   node test-api.js -b                       # Short form for birth chart
  */
 
 const io = require('socket.io-client');
+const fs = require('fs');
 
 // Configuration
-const SERVICE_URL = 'http://localhost:3000';
+const SERVICE_URL = process.argv[2] || 'http://localhost:3000';
 const TIMEOUT = 10000;
-
-// Test cases
-const tests = [
-  {
-    name: 'Calculate Sun Position',
-    request: [{
-      func: 'calc',
-      args: [{
-        date: {
-          gregorian: {
-            terrestrial: new Date().toISOString()
-          }
-        },
-        observer: {
-          ephemeris: 'swisseph',
-          geographic: {
-            longitude: 0,
-            latitude: 0,
-            height: 0
-          }
-        },
-        body: {
-          id: 0 // Sun
-        }
-      }]
-    }]
-  },
-  {
-    name: 'Calculate Moon Position',
-    request: [{
-      func: 'calc',
-      args: [{
-        date: {
-          gregorian: {
-            terrestrial: new Date().toISOString()
-          }
-        },
-        observer: {
-          ephemeris: 'swisseph',
-          geographic: {
-            longitude: 116.4074,  // Beijing
-            latitude: 39.9042,
-            height: 43
-          }
-        },
-        body: {
-          id: 1 // Moon
-        }
-      }]
-    }]
-  },
-  {
-    name: 'Calculate All Planets',
-    request: Array.from({ length: 10 }, (_, i) => ({
-      func: 'calc',
-      args: [{
-        date: {
-          gregorian: {
-            terrestrial: new Date().toISOString()
-          }
-        },
-        observer: {
-          ephemeris: 'swisseph',
-          geographic: {
-            longitude: 0,
-            latitude: 0,
-            height: 0
-          }
-        },
-        body: {
-          id: i // 0=Sun, 1=Moon, 2-9=Planets
-        }
-      }]
-    }))
-  },
-  {
-    name: 'Calculate Specific Date',
-    request: [{
-      func: 'calc',
-      args: [{
-        date: {
-          gregorian: {
-            terrestrial: '2024-01-01T00:00:00.000Z'
-          }
-        },
-        observer: {
-          ephemeris: 'de431',
-          geographic: {
-            longitude: 0,
-            latitude: 0,
-            height: 0
-          }
-        },
-        body: {
-          id: 5 // Jupiter
-        }
-      }]
-    }]
-  },
-  {
-    name: 'Generate Birth Chart SVG',
-    request: [{
-      func: 'houses',
-      args: [{
-        date: {
-          gregorian: {
-            terrestrial: { year: 1990, month: 6, day: 15, hour: 14.5 }
-          }
-        },
-        observer: {
-          ephemeris: 'swisseph',
-          geographic: {
-            longitude: 116.4074,  // Beijing
-            latitude: 39.9042,
-            height: 43
-          }
-        },
-        system: 'P'  // Placidus house system
-      }]
-    }]
-  }
-];
 
 /**
  * Generate Birth Chart SVG
@@ -158,9 +35,7 @@ function generateBirthChartSVG(chartData) {
     Asc: 'Asc', MC: 'MC', MeanNode: '☋'
   };
 
-  // Zodiac signs
-  const zodiacSigns = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
-                       'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+  // Zodiac symbols
   const zodiacSymbols = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
 
   // Convert degree to position on circle
@@ -170,11 +45,6 @@ function generateBirthChartSVG(chartData) {
       x: CENTER + radius * Math.cos(rad),
       y: CENTER + radius * Math.sin(rad)
     };
-  }
-
-  // Normalize degree to 0-360
-  function normalizeDegree(deg) {
-    return ((deg % 360) + 360) % 360;
   }
 
   // Generate SVG header
@@ -264,7 +134,7 @@ function generateBirthChartSVG(chartData) {
     };
 
     chartData.aspects.forEach(aspect => {
-      if (aspect.orb < 8) {  // Only show aspects within 8 degrees
+      if (aspect.orb < 8) {
         const pos1 = degreeToPos(aspect.body1Angle, PLANET_RADIUS);
         const pos2 = degreeToPos(aspect.body2Angle, PLANET_RADIUS);
         const color = aspectColors[aspect.type] || '#999';
@@ -357,30 +227,26 @@ function isoToDateObj(isoString) {
   const date = new Date(isoString);
   return {
     year: date.getFullYear(),
-    month: date.getMonth() + 1,  // swisseph expects 1-12
+    month: date.getMonth() + 1,
     day: date.getDate(),
     hour: date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600
   };
 }
 
 /**
- * Test birth chart generation
+ * Generate birth chart
  */
-async function testBirthChartGeneration(socket) {
-  console.log('\n📋 Test: Generate Birth Chart');
+async function generateBirthChart(socket) {
+  console.log('\n📋 Generating Birth Chart...');
 
   const birthDate = '1990-06-15T14:30:00.000Z';
-  // Using coordinates that work with Placidus system
-  // Beijing's longitude (116°E) causes issues with Placidus, so using a different location
-  const longitude = 0;  // Greenwich
+  const longitude = 0;    // Greenwich
   const latitude = 51.5;  // London
 
-  // Convert ISO date to swisseph format
   const dateObj = isoToDateObj(birthDate);
   console.log(`   📅 Birth date: ${JSON.stringify(dateObj)}`);
   console.log(`   📍 Location: ${longitude}°, ${latitude}°`);
 
-  // Step 1: Get all planet positions
   const planetIds = [
     { id: 0, name: 'Sun' },
     { id: 1, name: 'Moon' },
@@ -404,21 +270,17 @@ async function testBirthChartGeneration(socket) {
       },
       body: {
         id: p.id,
-        position: {}  // Required by swisseph.calc
+        position: {}
       }
     }]
   }));
 
-  // Step 2: Get Julian Day first, then house cusps
-  // swe_houses signature: swe_houses(tjd_ut, geolat, geolon, housenos_both, callback)
-  // So we need to call swe_julday first to get the Julian Day
   const juldayRequest = {
     func: 'swe_julday',
-    args: [dateObj.year, dateObj.month, dateObj.day, dateObj.hour, 1]  // 1 = SE_GREG_CAL
+    args: [dateObj.year, dateObj.month, dateObj.day, dateObj.hour, 1]
   };
 
   let julianDay = null;
-  let housesReceived = false;
 
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
@@ -430,70 +292,53 @@ async function testBirthChartGeneration(socket) {
 
     const handler = (result) => {
       try {
-        // Debug log to see the actual result structure
-        console.log(`   🔍 Received result type: ${typeof result}, keys: ${Object.keys(result || {}).join(', ')}`);
-
-        // Check for Julian Day result (returns a number directly)
+        // Check for Julian Day result
         if (typeof result === 'number' || (result && !result.body && !result.house && Object.keys(result).length === 0)) {
           julianDay = typeof result === 'number' ? result : result.julianDay || result.jd || result;
 
           if (julianDay) {
-            console.log(`   ✅ Received Julian Day: ${julianDay}`);
+            console.log(`   ✅ Julian Day: ${julianDay}`);
 
-            // Now send houses request
             const housesRequest = {
               func: 'swe_houses',
               args: [julianDay, latitude, longitude, 'P']
             };
 
             socket.emit('swisseph', [housesRequest]);
-            console.log(`   📤 Sent houses request`);
             return;
           }
         }
 
-        // swisseph.calc returns the full options object with nested body.position
+        // Planet result
         if (result && result.body && result.body.position && result.body.position.longitude) {
           const planetId = parseInt(result.body.id);
           const planetName = planetIds.find(p => p.id === planetId)?.name || `Planet${planetId}`;
-          const longitude = result.body.position.longitude.decimalDegree || result.body.position.longitude;
+          const lng = result.body.position.longitude.decimalDegree || result.body.position.longitude;
 
           planets.push({
             name: planetName,
-            longitude: longitude
+            longitude: lng
           });
 
-          console.log(`   ✅ Received ${planetName}: ${longitude.toFixed(2)}°`);
-
-          // Check if we have all planets
-          if (planets.length === planetIds.length) {
-            console.log(`   📊 All ${planets.length} planets received`);
-          }
+          console.log(`   ✅ ${planetName}: ${lng.toFixed(2)}°`);
         } else if (result && (result.cusps || result.house)) {
-          // House result - swe_houses returns 'house' array, not 'cusps'
+          // House result
           const cusps = result.cusps || result.house;
-          housesReceived = true;
-          console.log(`   ✅ Received ${cusps.length} house cusps`);
+          console.log(`   ✅ ${cusps.length} house cusps received`);
 
-          // Wait for planets to be complete
           if (planets.length === planetIds.length) {
             clearTimeout(timeout);
 
             const aspects = calculateAspects(planets);
-
             const chartData = {
               planets: planets,
               houses: cusps,
               aspects: aspects
             };
 
-            console.log(`   ✅ Calculated ${aspects.length} aspects`);
+            console.log(`   ✅ ${aspects.length} aspects calculated`);
 
-            // Generate SVG
             const svg = generateBirthChartSVG(chartData);
-
-            // Save to file
-            const fs = require('fs');
             const outputPath = '/Users/xiaozhu/_work/_code/swisseph-api/birth-chart.svg';
             fs.writeFileSync(outputPath, svg);
 
@@ -502,73 +347,34 @@ async function testBirthChartGeneration(socket) {
 
             socket.removeListener('swisseph result', handler);
             resolve({ success: true, path: outputPath });
-          } else {
-            console.log(`   ⏳ Waiting for more planets (${planets.length}/${planetIds.length})`);
           }
-        } else {
-          console.log(`   ⚠️  Unexpected result format:`, JSON.stringify(result).substring(0, 300));
         }
       } catch (error) {
-        console.error(`   ❌ Error handling result:`, error.message);
+        console.error(`   ❌ Error:`, error.message);
         clearTimeout(timeout);
         socket.removeListener('swisseph result', handler);
         reject(error);
       }
     };
 
-    // Set up listener BEFORE sending requests
     socket.on('swisseph result', handler);
 
-    // Small delay to ensure listener is ready
     setTimeout(() => {
-      // Send planet requests and Julian Day request
       socket.emit('swisseph', [...planetRequests, juldayRequest]);
     }, 100);
   });
 }
 
 /**
- * Run a single test
- */
-async function runTest(socket, testName, requestData) {
-  return new Promise((resolve, reject) => {
-    console.log(`\n📋 Test: ${testName}`);
-    console.log('   Request:', JSON.stringify(requestData, null, 2));
-
-    const timeout = setTimeout(() => {
-      reject(new Error('Timeout after ' + TIMEOUT + 'ms'));
-    }, TIMEOUT);
-
-    let responseCount = 0;
-    const expectedCount = requestData.length;
-
-    const handler = (result) => {
-      responseCount++;
-      console.log(`   ✅ Result ${responseCount}/${expectedCount}:`, JSON.stringify(result, null, 2));
-
-      if (responseCount >= expectedCount) {
-        clearTimeout(timeout);
-        socket.removeListener('swisseph result', handler);
-        resolve(result);
-      }
-    };
-
-    socket.on('swisseph result', handler);
-    socket.emit('swisseph', requestData);
-  });
-}
-
-/**
- * Main test runner
+ * Main
  */
 async function main() {
-  console.log('═════════════════════════════════════════════════════');
-  console.log('  Swiss Ephemeris API Test Suite');
-  console.log('═════════════════════════════════════════════════════');
+  console.log('═══════════════════════════════════════════════════');
+  console.log('  Birth Chart Generator');
+  console.log('═══════════════════════════════════════════════════');
   console.log(`  Target: ${SERVICE_URL}`);
-  console.log('═════════════════════════════════════════════════════');
+  console.log('═══════════════════════════════════════════════════');
 
-  // Connect to Socket.IO
   console.log('\n🔌 Connecting to Socket.IO...');
   const socket = io(SERVICE_URL, {
     transports: ['websocket', 'polling'],
@@ -577,7 +383,7 @@ async function main() {
 
   await new Promise((resolve, reject) => {
     socket.on('connect', () => {
-      console.log('   ✅ Connected successfully');
+      console.log('   ✅ Connected');
       console.log(`   Socket ID: ${socket.id}`);
       resolve();
     });
@@ -588,59 +394,17 @@ async function main() {
     });
   });
 
-  // Run all tests
-  const results = {
-    passed: 0,
-    failed: 0
-  };
-
-  // Check if we should run birth chart generation
-  const runBirthChart = process.argv.includes('--birth-chart') || process.argv.includes('-b');
-
-  if (runBirthChart) {
-    console.log('\n🎨 Running birth chart generation test...');
-    try {
-      await testBirthChartGeneration(socket);
-      results.passed++;
-    } catch (error) {
-      console.error(`   ❌ Birth chart generation failed:`, error.message);
-      results.failed++;
-    }
-  } else {
-    // Run standard tests
-    i = 0
-    for (const test of tests) {
-      try {
-        if (i > 0) {
-          continue;
-        }
-        await runTest(socket, test.name, test.request);
-        results.passed++;
-        i++;
-      } catch (error) {
-        console.error(`   ❌ Test failed:`, error.message);
-        results.failed++;
-      }
-    }
+  try {
+    await generateBirthChart(socket);
+    console.log('\n✅ Birth chart generated successfully!');
+  } catch (error) {
+    console.error('\n❌ Failed:', error.message);
   }
 
-  // Disconnect
   socket.disconnect();
   console.log('\n🔌 Disconnected');
-
-  // Summary
-  console.log('\n═════════════════════════════════════════════════════');
-  console.log('  Test Summary');
-  console.log('═════════════════════════════════════════════════════');
-  console.log(`  Total:  ${tests.length}`);
-  console.log(`  Passed: ${results.passed} ✅`);
-  console.log(`  Failed: ${results.failed} ❌`);
-  console.log('═════════════════════════════════════════════════════');
-
-  process.exit(results.failed > 0 ? 1 : 0);
 }
 
-// Run tests
 main().catch(error => {
   console.error('\n❌ Fatal error:', error);
   process.exit(1);
