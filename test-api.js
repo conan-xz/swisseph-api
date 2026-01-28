@@ -39,6 +39,7 @@ function generateBirthChartSVG(chartData) {
     Asc: 'Asc', MC: 'MC', MeanNode: '☋'
   };
 
+  // Zodiac symbols
   const zodiacSymbols = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
 
   function degreeToPos(deg, radius) {
@@ -49,6 +50,7 @@ function generateBirthChartSVG(chartData) {
     };
   }
 
+  // Generate SVG header
   let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" id="chart">
   <title>Birth Chart</title>
   <defs>
@@ -298,10 +300,10 @@ async function generateBirthChart(socket, birthData) {
         if (result && result.body && result.body.position && result.body.position.longitude) {
           const planetId = parseInt(result.body.id);
           const planetName = planetIds.find(p => p.id === planetId)?.name || `Planet${planetId}`;
-          const longitude = result.body.position.longitude.decimalDegree || result.body.position.longitude;
+          const lng = result.body.position.longitude.decimalDegree || result.body.position.longitude;
 
-          planets.push({ name: planetName, longitude: longitude });
-          console.log(`   ✅ ${planetName}: ${longitude.toFixed(2)}°`);
+          planets.push({ name: planetName, longitude: lng });
+          console.log(`   ✅ ${planetName}: ${lng.toFixed(2)}°`);
 
           if (planets.length === planetIds.length && housesReceived) {
             completeChart();
@@ -310,8 +312,8 @@ async function generateBirthChart(socket, birthData) {
         // House result
         else if (result && (result.cusps || result.house)) {
           const cusps = result.cusps || result.house;
+          console.log(`   ✅ ${cusps.length} house cusps received`);
           housesReceived = true;
-          console.log(`   ✅ Received ${cusps.length} house cusps`);
 
           if (planets.length === planetIds.length && housesReceived) {
             completeChart(cusps);
