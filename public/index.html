@@ -178,6 +178,33 @@
     </tr>
     <tr>
         <td>
+            <table class='table-group'>
+                <thead>
+                <tr>
+                    <th colspan='4' class='table-header'>高德地图API测试</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td style='width: 15%;' class='title'>地址转经纬度:</td>
+                    <td style='width: 35%;'><input type='text' id='amap-address' placeholder='输入地址，如：北京市朝阳区' onkeypress='if(event.keyCode==13) $app.amapGeocode()'></td>
+                    <td style='width: 25%;' class='numeric' data-var='$app.amapResult.lat'></td>
+                    <td style='width: 25%;' class='numeric' data-var='$app.amapResult.lng'></td>
+                </tr>
+                <tr>
+                    <td class='title'>经纬度转地址:</td>
+                    <td><input type='text' id='amap-coords' placeholder='输入经纬度，如：116.404,39.915' onkeypress='if(event.keyCode==13) $app.amapReverseGeocode()'></td>
+                    <td colspan='2' class='string' data-var='$app.amapReverseResult.formatted_address'></td>
+                </tr>
+                <tr>
+                    <td class='title' style='color: gray;' colspan='4'>Help: 输入地址或经纬度后按回车键进行转换</td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
             <table>
                 <tbody>
                 <tr>

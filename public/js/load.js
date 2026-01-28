@@ -27,6 +27,17 @@ socket.on ('swisseph result', function (result) {
 	$app.setVar ();
 });
 
+socket.on ('amap result', function (result) {
+    console.log ('AMap result:', result);
+    if (result.error) {
+        alert('高德地图API错误: ' + result.error);
+    } else {
+        // 处理成功的结果
+        $copy ($app, result);
+        $app.setVar ();
+    }
+});
+
 $app.update = function (event) {
 	var dateVar;
 
@@ -41,7 +52,7 @@ $app.update = function (event) {
 	}
 
 	$app.getGroupVar ('$app.date', dateVar);
-	
+
     socket.emit ('swisseph', [{
     	func: 'calc',
     	args: [{
@@ -50,6 +61,48 @@ $app.update = function (event) {
 			body: $app.body
 		}]
 	}]);
+};
+
+// 高德地图地理编码（地址转经纬度）
+$app.amapGeocode = function () {
+    var address = document.getElementById('amap-address').value;
+    if (!address) {
+        alert('请输入地址');
+        return;
+    }
+
+    socket.emit ('amap', [{
+        func: 'geocode',
+        args: [address]
+    }]);
+};
+
+// 高德地图逆地理编码（经纬度转地址）
+$app.amapReverseGeocode = function () {
+    var coords = document.getElementById('amap-coords').value;
+    if (!coords) {
+        alert('请输入经纬度，格式：经度,纬度');
+        return;
+    }
+
+    var parts = coords.split(',');
+    if (parts.length !== 2) {
+        alert('经纬度格式错误，请使用：经度,纬度');
+        return;
+    }
+
+    var lng = parseFloat(parts[0].trim());
+    var lat = parseFloat(parts[1].trim());
+
+    if (isNaN(lng) || isNaN(lat)) {
+        alert('经纬度必须为数字');
+        return;
+    }
+
+    socket.emit ('amap', [{
+        func: 'reverseGeocode',
+        args: [lat, lng]
+    }]);
 };
 
 $app.getGroupVar = function (varGroup, varName) {
