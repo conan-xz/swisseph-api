@@ -3,7 +3,7 @@
  *
  * Usage:
  *   node test-api.js
- *   node test-api.js http://localhost:80
+ *   node test-api.js http://localhost:3000
  *
  * Generates a birth chart SVG and saves to birth-chart.svg
  */
