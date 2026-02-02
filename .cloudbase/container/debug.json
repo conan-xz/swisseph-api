@@ -1,0 +1,26 @@
+{
+  "containers": [
+    {
+      "name": "swisseph-api",
+      "domain": "",
+      "ip": ""
+    }
+  ],
+  "config": {
+    "swisseph-api": {
+      "remark": "",
+      "dockerfilePath": "Dockerfile",
+      "buildDir": "",
+      "minNum": 0,
+      "maxNum": 50,
+      "cpu": 0.5,
+      "mem": 1,
+      "policyType": "cpu",
+      "policyThreshold": 60,
+      "envParams": {},
+      "customLogs": "stdout",
+      "containerPort": 80,
+      "initialDelaySeconds": 2
+    }
+  }
+}

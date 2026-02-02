@@ -1,7 +1,7 @@
 # Multi-stage build for optimized image size
 
 # Stage 1: Build dependencies
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 
 # Install build dependencies for native modules
 RUN apk add --no-cache python3 make g++ py3-setuptools
@@ -16,7 +16,7 @@ COPY package*.json ./
 RUN npm install --only=production
 
 # Stage 2: Production image
-FROM node:20-alpine
+FROM node:25-alpine
 
 # Set working directory
 WORKDIR /app
@@ -35,14 +35,14 @@ COPY --chown=nodejs:nodejs . .
 USER nodejs
 
 # Expose port
-EXPOSE 3000
+EXPOSE 80
 
 # Set environment to production
 ENV NODE_ENV=production
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+    CMD node -e "require('http').get('http://localhost:80', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start application
 CMD ["npm", "start"]
