@@ -3,8 +3,7 @@
     {
       "name": "swisseph-api",
       "domain": "",
-      "ip": "",
-      "containerId": "7fefc5ea2f577d3ea5841760370dbf25566d3aa6bf25b0900cd3204d4eaf8f9b"
+      "ip": ""
     }
   ],
   "config": {
@@ -20,7 +19,7 @@
       "policyThreshold": 60,
       "envParams": {},
       "customLogs": "stdout",
-      "containerPort": 80,
+      "containerPort": 3000,
       "initialDelaySeconds": 2
     }
   }
