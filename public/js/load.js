@@ -7,8 +7,9 @@ window.addEventListener ('keypress', function (event) {
 	}
 });
 
-// Auto-connect to current host (supports any domain/port)
-var socket = io.connect();
+// Auto-connect to current host using WebSocket (supports any domain/port)
+var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+var socket = new WebSocket(protocol + '//' + window.location.host + '/ws');
 
 jQuery ('#gt-date').datetimepicker ({
 	value: (new Date ()).dateFormat ('d.m.Y H:i:s'),
@@ -21,22 +22,40 @@ jQuery ('#gu-date').datetimepicker ({
 	format: 'd.m.Y H:i:s'
 });
 
-socket.on ('swisseph result', function (result) {
-    console.log (result);
-	$copy ($app, result);
-	$app.setVar ();
-});
+// Handle WebSocket connection events
+socket.onopen = function(event) {
+    console.log('WebSocket connected');
+};
 
-socket.on ('amap result', function (result) {
-    console.log ('AMap result:', result);
-    if (result.error) {
-        alert('高德地图API错误: ' + result.error);
-    } else {
-        // 处理成功的结果
-        $copy ($app, result);
-        $app.setVar ();
+socket.onmessage = function(event) {
+    try {
+        var data = JSON.parse(event.data);
+        if (data.type === 'swisseph result') {
+            console.log(data.result);
+            $copy($app, data.result);
+            $app.setVar();
+        } else if (data.type === 'amap result') {
+            console.log('AMap result:', data.result);
+            if (data.result.error) {
+                alert('高德地图API错误: ' + data.result.error);
+            } else {
+                // 处理成功的结果
+                $copy($app, data.result);
+                $app.setVar();
+            }
+        }
+    } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
     }
-});
+};
+
+socket.onclose = function(event) {
+    console.log('WebSocket disconnected');
+};
+
+socket.onerror = function(error) {
+    console.error('WebSocket error:', error);
+};
 
 $app.update = function (event) {
 	var dateVar;
@@ -53,14 +72,17 @@ $app.update = function (event) {
 
 	$app.getGroupVar ('$app.date', dateVar);
 
-    socket.emit ('swisseph', [{
-    	func: 'calc',
-    	args: [{
-			date: $app.date,
-			observer: $app.observer,
-			body: $app.body
-		}]
-	}]);
+    socket.send(JSON.stringify({
+        type: 'swisseph',
+        data: [{
+            func: 'calc',
+            args: [{
+                date: $app.date,
+                observer: $app.observer,
+                body: $app.body
+            }]
+        }]
+    }));
 };
 
 // 高德地图地理编码（地址转经纬度）
@@ -71,10 +93,13 @@ $app.amapGeocode = function () {
         return;
     }
 
-    socket.emit ('amap', [{
-        func: 'geocode',
-        args: [address]
-    }]);
+    socket.send(JSON.stringify({
+        type: 'amap',
+        data: [{
+            func: 'geocode',
+            args: [address]
+        }]
+    }));
 };
 
 // 高德地图逆地理编码（经纬度转地址）
@@ -99,10 +124,13 @@ $app.amapReverseGeocode = function () {
         return;
     }
 
-    socket.emit ('amap', [{
-        func: 'reverseGeocode',
-        args: [lat, lng]
-    }]);
+    socket.send(JSON.stringify({
+        type: 'amap',
+        data: [{
+            func: 'reverseGeocode',
+            args: [lat, lng]
+        }]
+    }));
 };
 
 $app.getGroupVar = function (varGroup, varName) {

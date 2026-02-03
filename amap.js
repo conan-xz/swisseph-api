@@ -36,18 +36,16 @@ function geocode(address, city = '') {
 
     const queryString = querystring.stringify(params);
     const url = `${AMAP_CONFIG.BASE_URL}/geocode/geo?${queryString}`;
-
     https.get(url, (response) => {
       let data = '';
 
       response.on('data', (chunk) => {
         data += chunk;
       });
-
+      
       response.on('end', () => {
         try {
           const result = JSON.parse(data);
-
           if (response.statusCode === 200) {
             if (result.status === '1' && result.geocodes && result.geocodes.length > 0) {
               const geocode = result.geocodes[0];
