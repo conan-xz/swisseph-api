@@ -3,7 +3,8 @@
     {
       "name": "swisseph-api",
       "domain": "",
-      "ip": ""
+      "ip": "",
+      "containerId": "761face6cb17843a69c6a28a9f94ed151904e2dcb4ec2c9a4677a84d61c82b9b"
     }
   ],
   "config": {
