@@ -25,6 +25,9 @@ WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
+# Install curl before copying files
+RUN apk add --no-cache curl
+
 # Copy dependencies from builder
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 
@@ -39,9 +42,6 @@ EXPOSE 3000
 
 # Set environment to production
 ENV NODE_ENV=production
-
-# Install curl for health checks
-RUN apk add --no-cache curl
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
