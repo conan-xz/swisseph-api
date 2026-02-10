@@ -1,6 +1,7 @@
 var swisseph = require ('swisseph');
 var amap = require ('./amap');
 var WebSocket = require('ws');
+var wechatService = require ('./services/wechat');
 
 swisseph.swe_set_ephe_path (process.env.SWISSEPH_EPHEMERIS_PATH || (__dirname + '/ephe'));
 
@@ -21,6 +22,8 @@ function api (server) {
 					handleSwissephMessage(ws, message.data);
 				} else if (message.type === 'amap') {
 					handleAmapMessage(ws, message.data);
+				} else if (message.type === 'wechat') {
+					handleWechatMessage(ws, message.data);
 				}
 			} catch (error) {
 				console.error('Error parsing WebSocket message:', error);
@@ -61,5 +64,74 @@ async function handleAmapMessage(ws, args) {
 		}
 	} catch (error) {
 		ws.send(JSON.stringify({ type: 'amap result', result: { error: error.message } }));
+	}
+}
+
+/**
+ * Handle WeChat WebSocket messages
+ * 处理微信 WebSocket 消息
+ *
+ * @param {WebSocket} ws - WebSocket connection
+ * @param {Array} args - Array of wechat function calls, each with { func, args }
+ */
+async function handleWechatMessage(ws, args) {
+	try {
+		for (let i = 0; i < args.length; i++) {
+			const func = args[i].func;
+			const funcArgs = args[i].args;
+
+			if (func === 'codeToSession') {
+				const code = funcArgs[0]; // code is the first argument
+
+				if (!code) {
+					ws.send(JSON.stringify({
+						type: 'wechat result',
+						result: {
+							error: 'code is required',
+							code: 'INVALID_PARAM'
+						}
+					}));
+					continue;
+				}
+
+				try {
+					const result = await wechatService.codeToSession(code);
+					ws.send(JSON.stringify({
+						type: 'wechat result',
+						result: {
+							success: true,
+							data: result
+						}
+					}));
+				} catch (error) {
+					console.error('WeChat WebSocket error:', error.message);
+					ws.send(JSON.stringify({
+						type: 'wechat result',
+						result: {
+							error: error.message,
+							code: error.message.includes('APP_ID') || error.message.includes('APP_SECRET')
+								? 'CONFIG_ERROR'
+								: 'WECHAT_API_ERROR'
+						}
+					}));
+				}
+			} else {
+				ws.send(JSON.stringify({
+					type: 'wechat result',
+					result: {
+						error: `Function ${func} not found`,
+						code: 'FUNCTION_NOT_FOUND'
+					}
+				}));
+			}
+		}
+	} catch (error) {
+		ws.send(JSON.stringify({
+			type: 'wechat result',
+			result: {
+				error: error.message,
+				code: 'INTERNAL_ERROR'
+			}
+		}));
 	}
 }
