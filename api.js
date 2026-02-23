@@ -1,5 +1,5 @@
 var swisseph = require ('swisseph');
-var amap = require ('./amap');
+var amap = require ('./services/amap');
 var WebSocket = require('ws');
 var wechatService = require ('./services/wechat');
 
