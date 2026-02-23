@@ -2,6 +2,7 @@ var swisseph = require ('swisseph');
 var amap = require ('./services/amap');
 var WebSocket = require('ws');
 var wechatService = require ('./services/wechat');
+var dashscopeService = require ('./services/dashscope');
 
 swisseph.swe_set_ephe_path (process.env.SWISSEPH_EPHEMERIS_PATH || (__dirname + '/ephe'));
 
@@ -24,6 +25,8 @@ function api (server) {
 					handleAmapMessage(ws, message.data);
 				} else if (message.type === 'wechat') {
 					handleWechatMessage(ws, message.data);
+				} else if (message.type === 'dashscope') {
+					handleDashscopeMessage(ws, message.data);
 				}
 			} catch (error) {
 				console.error('Error parsing WebSocket message:', error);
@@ -40,6 +43,80 @@ function api (server) {
 		});
 	});
 };
+
+/**
+ * Handle DashScope WebSocket messages
+ * 处理通义千问 WebSocket 消息
+ *
+ * @param {WebSocket} ws - WebSocket connection
+ * @param {Array} args - Array of dashscope function calls, each with { func, args }
+ */
+async function handleDashscopeMessage(ws, args) {
+	try {
+		for (let i = 0; i < args.length; i++) {
+			const func = args[i].func;
+			const funcArgs = args[i].args;
+
+			if (func === 'generateText') {
+				const prompt = funcArgs[0]; // prompt is the first argument
+				const options = funcArgs[1] || {}; // options is the second argument (optional)
+
+				if (!prompt) {
+					ws.send(JSON.stringify({
+						type: 'dashscope result',
+						result: {
+							error: 'prompt is required',
+							code: 'INVALID_PARAM'
+						}
+					}));
+					continue;
+				}
+
+				try {
+					const result = await dashscopeService.generateText(prompt, options);
+					ws.send(JSON.stringify({
+						type: 'dashscope result',
+						result: {
+							success: true,
+							data: {
+								content: result
+							}
+						}
+					}));
+				} catch (error) {
+					console.error('DashScope WebSocket error:', error.message);
+					ws.send(JSON.stringify({
+						type: 'dashscope result',
+						result: {
+							error: error.message,
+							code: error.message.includes('API_KEY not configured')
+								? 'CONFIG_ERROR'
+								: error.message.includes('DashScope API Error')
+									? 'DASHSCOPE_API_ERROR'
+									: 'INTERNAL_ERROR'
+						}
+					}));
+				}
+			} else {
+				ws.send(JSON.stringify({
+					type: 'dashscope result',
+					result: {
+						error: `Function ${func} not found`,
+						code: 'FUNCTION_NOT_FOUND'
+					}
+				}));
+			}
+		}
+	} catch (error) {
+		ws.send(JSON.stringify({
+			type: 'dashscope result',
+			result: {
+				error: error.message,
+				code: 'INTERNAL_ERROR'
+			}
+		}));
+	}
+}
 
 function handleSwissephMessage(ws, args) {
 	var i;
