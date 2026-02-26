@@ -4,3 +4,7 @@ build
 .idea
 bower_components
 .DS_Store
+
+# SSL/TLS certificates
+certs/
+*.key

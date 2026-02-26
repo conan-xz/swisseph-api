@@ -7,6 +7,8 @@
 var app = require ('../app');
 var debug = require ('debug') ('swisseph-api:server');
 var http = require ('http');
+var https = require ('https');
+var fs = require ('fs');
 
 /**
  * Get port from environment and store in Express.
@@ -16,10 +18,23 @@ var port = normalizePort (process.env.PORT || '3000');
 app.set ('port', port);
 
 /**
- * Create HTTP server.
+ * Create HTTP/HTTPS server.
  */
 
-var server = http.createServer (app);
+var server;
+var useHttps = process.env.SSL_ENABLED === 'true' || process.env.SSL_ENABLED === '1';
+
+if (useHttps) {
+  var sslOptions = {
+    cert: fs.readFileSync(process.env.SSL_CERT_PATH || './certs/astrology.work_bundle.crt'),
+    key: fs.readFileSync(process.env.SSL_KEY_PATH || './certs/astrology.work.key')
+  };
+  server = https.createServer(sslOptions, app);
+  console.log('HTTPS server enabled');
+} else {
+  server = http.createServer(app);
+  console.log('HTTP server enabled');
+}
 
 /**
  * Socket.io API

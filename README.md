@@ -93,6 +93,36 @@ Required environment variables:
 - `SWISSEPH_EPHEMERIS_PATH` - Swiss Ephemeris data path (optional)
 - `PORT` - Server port (default: 3000)
 
+### TLS/HTTPS Configuration
+
+To enable HTTPS support, set the following environment variables:
+
+- `SSL_ENABLED=true` - Enable HTTPS server (default: false, uses HTTP)
+- `SSL_CERT_PATH` - Path to SSL certificate file (default: `./certs/astrology.work_bundle.crt`)
+- `SSL_KEY_PATH` - Path to SSL private key file (default: `./certs/astrology.work.key`)
+
+**Certificate Setup:**
+
+1. Create a `certs/` directory in the project root:
+   ```bash
+   mkdir certs
+   ```
+
+2. Place your certificate files in the `certs/` directory:
+   - `astrology.work_bundle.crt` - Server certificate (including full chain)
+   - `astrology.work.key` - Private key
+
+3. Start the server with HTTPS:
+   ```bash
+   SSL_ENABLED=true npm start
+   # Access via https://localhost:3000
+   ```
+
+**Note:**
+- The `.key` file is sensitive and should NOT be committed to Git (already in `.gitignore`)
+- `.bundle.crt` should contain the full certificate chain (server cert + intermediate certs)
+- WebSocket connections must use `wss://` when HTTPS is enabled
+
 ## Docker Usage
 
 ```bash
@@ -112,7 +142,16 @@ docker run -d --name swisseph-api \
 Project is under development.
 
 
-## docker build run
+## docker build
 docker build -t swisseph-api:latest .
 
-docker run -d --name swisseph-api -p 3000:3000 -e WECHAT_APP_ID=xxx -e WECHAT_APP_SECRET=xxx -e DASHSCOPE_API_KEY=xxx -e DASHSCOPE_MODEL=xxx swisseph-api:latest
+## docker run
+docker run -d --name swisseph-api \
+  -p 3000:3000 \
+  -v $(pwd)/certs:/app/certs \
+  -e SSL_ENABLED=true \
+  -e WECHAT_APP_ID=xxx \
+  -e WECHAT_APP_SECRET=xxx \
+  -e DASHSCOPE_API_KEY=sk-xxx \
+  -e DASHSCOPE_MODEL=qwen-max \
+  swisseph-api:latest
