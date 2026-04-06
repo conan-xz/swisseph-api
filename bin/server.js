@@ -9,6 +9,7 @@ var debug = require ('debug') ('swisseph-api:server');
 var http = require ('http');
 var https = require ('https');
 var fs = require ('fs');
+var db = require('../services/db');
 
 /**
  * Get port from environment and store in Express.
@@ -49,6 +50,18 @@ var api = require ('../api') (server);
 server.listen (port);
 server.on ('error', onError);
 server.on ('listening', onListening);
+
+db.initializeDatabase()
+  .then(function () {
+    if (db.isConfigured()) {
+      console.log('Database initialized');
+    } else {
+      console.log('Database not configured; synastry REST features will be unavailable');
+    }
+  })
+  .catch(function (error) {
+    console.error('Database initialization failed:', error.message);
+  });
 
 /**
  * Normalize a port into a number, string, or false.

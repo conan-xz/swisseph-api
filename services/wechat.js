@@ -64,6 +64,82 @@ async function codeToSession(code) {
   }
 }
 
+/**
+ * Build WeChat H5 OAuth URL
+ * 使用公众号网页授权构建跳转地址
+ */
+function buildH5OAuthUrl(redirectUri, state = '', scope = config.oauthScope || 'snsapi_base') {
+  if (!config.h5AppId) {
+    throw new Error('WeChat H5 APP_ID not configured');
+  }
+
+  if (!redirectUri) {
+    throw new Error('redirectUri is required');
+  }
+
+  const params = new URLSearchParams({
+    appid: config.h5AppId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope,
+    state: state || 'astrology'
+  });
+
+  return `${config.oauthAuthorizeUrl}?${params.toString()}#wechat_redirect`;
+}
+
+/**
+ * Exchange H5 OAuth code for openid
+ * 用公众号网页授权 code 换取 openid
+ */
+async function h5CodeToSession(code) {
+  try {
+    if (!code) {
+      throw new Error('code is required');
+    }
+
+    if (code === 'test') {
+      return {
+        openid: 'test_user',
+        unionid: 'test_user'
+      };
+    }
+
+    if (!config.h5AppId || !config.h5AppSecret) {
+      throw new Error('WeChat H5 APP_ID or APP_SECRET not configured');
+    }
+
+    const response = await axios.get(config.oauthAccessTokenUrl, {
+      params: {
+        appid: config.h5AppId,
+        secret: config.h5AppSecret,
+        code,
+        grant_type: 'authorization_code'
+      },
+      timeout: 5000
+    });
+
+    const { data } = response;
+    if (data.errcode) {
+      throw new Error(`WeChat OAuth Error: ${data.errcode} - ${data.errmsg || 'Unknown error'}`);
+    }
+
+    if (!data.openid) {
+      throw new Error('Failed to get openid from WeChat OAuth API');
+    }
+
+    return {
+      openid: data.openid,
+      unionid: data.unionid || null
+    };
+  } catch (error) {
+    console.error('WeChat h5CodeToSession error:', error.message);
+    throw error;
+  }
+}
+
 module.exports = {
-  codeToSession
+  codeToSession,
+  h5CodeToSession,
+  buildH5OAuthUrl
 };

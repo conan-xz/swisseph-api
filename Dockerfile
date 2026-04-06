@@ -3,6 +3,10 @@
 # Stage 1: Build dependencies
 FROM node:25-alpine AS builder
 
+# Use domestic mirrors to speed up package installation in CN deployments.
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories && \
+    npm config set registry https://registry.npmmirror.com
+
 # Install build dependencies for native modules
 RUN apk add --no-cache python3 make g++ py3-setuptools
 
@@ -17,6 +21,10 @@ RUN npm install --omit=dev
 
 # Stage 2: Production image
 FROM node:25-alpine
+
+# Use the same mirrors in the runtime image for any future package operations.
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories && \
+    npm config set registry https://registry.npmmirror.com
 
 # Set working directory
 WORKDIR /app
@@ -45,7 +53,7 @@ ENV NODE_ENV=production
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:3000/api/health || exit 1
+    CMD if [ "$SSL_ENABLED" = "true" ] || [ "$SSL_ENABLED" = "1" ]; then curl -kf https://localhost:3000/api/health || exit 1; else curl -f http://localhost:3000/api/health || exit 1; fi
 
 # Start application
 CMD ["npm", "start"]

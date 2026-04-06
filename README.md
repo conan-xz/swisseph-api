@@ -28,6 +28,25 @@ Access to server by URL: http://localhost:3000.
 - **POST** `/api/wechat/code2session` - Exchange WeChat code for session (openid, session_key)
   - Body: `{ "code": "wx_login_code" }`
 
+### Auth API
+- **POST** `/api/auth/login` - Exchange WeChat code for session and issue backend token
+  - Body: `{ "code": "wx_login_code" }`
+- **GET** `/api/auth/me` - Get current user profile
+  - Header: `Authorization: Bearer <token>`
+
+### Synastry API
+- **POST** `/api/synastry/invites` - Create a synastry invite
+  - Header: `Authorization: Bearer <token>`
+- **GET** `/api/synastry/invites/:code` - Fetch invite preview and status
+- **POST** `/api/synastry/invites/:code/accept` - Accept invite and generate shared synastry report
+  - Header: `Authorization: Bearer <token>`
+- **GET** `/api/synastry/reports/:id` - Fetch a shared synastry report
+  - Header: `Authorization: Bearer <token>`
+- **GET** `/api/synastry/my/invites` - List my created invites
+  - Header: `Authorization: Bearer <token>`
+- **GET** `/api/synastry/my/reports` - List my shared reports
+  - Header: `Authorization: Bearer <token>`
+
 ### DashScope API (Qwen)
 - **POST** `/api/analyze` - Call DashScope API for text analysis
   - Body: `{ "prompt": "your prompt text" }`
@@ -91,6 +110,11 @@ Required environment variables:
 - `WECHAT_APP_SECRET` - WeChat App Secret (optional)
 - `AMAP_KEY` - AMap API key (optional)
 - `SWISSEPH_EPHEMERIS_PATH` - Swiss Ephemeris data path (optional)
+- `AUTH_TOKEN_SECRET` - Backend auth token signing secret (required for auth-protected APIs)
+- `AUTH_TOKEN_TTL_SEC` - Backend auth token TTL in seconds (default: 604800)
+- `DATABASE_URL` - PostgreSQL connection string for invite/report persistence
+- `PGHOST` / `PGPORT` / `PGDATABASE` / `PGUSER` / `PGPASSWORD` - PostgreSQL discrete config if `DATABASE_URL` is not used
+- `PGSSL` - Whether to enable PostgreSQL SSL (`true` or `false`)
 - `PORT` - Server port (default: 3000)
 
 ### TLS/HTTPS Configuration
@@ -134,8 +158,25 @@ docker run -d --name swisseph-api \
   -e DASHSCOPE_MODEL=qwen-max \
   -e WECHAT_APP_ID=xxx \
   -e WECHAT_APP_SECRET=xxx \
+  -e AUTH_TOKEN_SECRET=replace-with-random-secret \
+  -e DATABASE_URL=postgres://postgres:postgres@postgres:5432/swisseph_api \
   swisseph-api:latest
 ```
+
+## Docker Compose with PostgreSQL
+
+1. Copy `.env.example` to `.env` and fill in the secrets.
+2. Start the full stack:
+
+```bash
+docker compose up -d --build
+```
+
+This starts:
+- `swisseph-api` application container
+- `postgres` database container
+
+The application bootstraps the required tables automatically on startup.
 
 ## Status
 

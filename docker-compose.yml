@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: swisseph-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PGDATABASE:-swisseph_api}
+      POSTGRES_USER: ${PGUSER:-postgres}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-postgres}
+    volumes:
+      - swisseph_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${PGUSER:-postgres} -d ${PGDATABASE:-swisseph_api}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  swisseph-api:
+    build: .
+    container_name: swisseph-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    volumes:
+      - ./certs:/app/certs:ro
+
+volumes:
+  swisseph_pgdata:

@@ -6,8 +6,33 @@ var cookieParser = require ('cookie-parser');
 var bodyParser = require ('body-parser');
 
 var routes = require ('./routes/index');
+var authRoutes = require('./routes/auth');
+var synastryRoutes = require('./routes/synastry');
 
 var app = express ();
+
+app.use(function (req, res, next) {
+    var origin = req.headers.origin || '';
+    var allowedOrigins = [
+        'https://www.astrology.work',
+        'https://astrology.work',
+        'http://localhost:5173',
+        'http://127.0.0.1:5173'
+    ];
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+        res.header('Access-Control-Allow-Origin', origin);
+    }
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(204);
+    }
+
+    next();
+});
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -19,6 +44,8 @@ app.use (require ('less-middleware') (path.join (__dirname, 'public')));
 app.use (express.static (path.join (__dirname, 'public')));
 
 app.use('/', routes);
+app.use('/api/auth', authRoutes);
+app.use('/api/synastry', synastryRoutes);
 
 // catch 404 and forward to error handler
 app.use (function (req, res, next) {

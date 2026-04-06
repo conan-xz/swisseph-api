@@ -2,6 +2,7 @@ var express = require ('express');
 var router = express.Router ();
 var wechatService = require ('../services/wechat');
 var dashscopeService = require ('../services/dashscope');
+var db = require('../services/db');
 
 router.get ('/', function (req, res, next) {
 	res.render ('index');
@@ -12,7 +13,8 @@ router.get ('/api/health', function (req, res, next) {
 	res.json({
 		status: 'ok',
 		timestamp: new Date().toISOString(),
-		service: 'swisseph-api'
+		service: 'swisseph-api',
+		databaseConfigured: db.isConfigured()
 	});
 });
 
