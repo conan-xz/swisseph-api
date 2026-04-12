@@ -10,6 +10,8 @@ var authRoutes = require('./routes/auth');
 var synastryRoutes = require('./routes/synastry');
 
 var app = express ();
+app.set('etag', false);
+app.set('trust proxy', true);
 
 app.use(function (req, res, next) {
     var origin = req.headers.origin || '';

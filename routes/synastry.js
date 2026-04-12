@@ -154,7 +154,7 @@ router.post('/invites', authRequired, async function createInvite(req, res) {
       success: true,
       data: {
         inviteCode: result.inviteCode,
-        inviteUrl: `/pages/synastry/invite?code=${result.inviteCode}`,
+        inviteUrl: `/pages/synastry/synastry?inviteCode=${result.inviteCode}`,
         inviterPreview: result.inviterPreview
       }
     });

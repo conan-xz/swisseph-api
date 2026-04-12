@@ -24,8 +24,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    ports:
-      - '3000:3000'
+    expose:
+      - '3000'
+    environment:
+      SSL_ENABLED: 'false'
     env_file:
       - .env
     volumes:
