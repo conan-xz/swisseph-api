@@ -32,7 +32,7 @@ router.post('/login', async function login(req, res) {
       : await wechatService.h5CodeToSession(code);
     await db.initializeDatabase();
     const cleanNickName = sanitizeNickName(nickName);
-    await db.query(
+    const upsertResult = await db.query(
       `
         INSERT INTO users (openid, unionid, nick_name, created_at, last_login_at)
         VALUES ($1, $2, $3, NOW(), NOW())
@@ -41,6 +41,7 @@ router.post('/login', async function login(req, res) {
           unionid = COALESCE(EXCLUDED.unionid, users.unionid),
           nick_name = COALESCE(EXCLUDED.nick_name, users.nick_name),
           last_login_at = NOW()
+        RETURNING nick_name
       `,
       [authData.openid, authData.unionid || null, cleanNickName]
     );
@@ -56,7 +57,8 @@ router.post('/login', async function login(req, res) {
       data: {
         token,
         openid: authData.openid,
-        unionid: authData.unionid || null
+        unionid: authData.unionid || null,
+        nickName: upsertResult.rows[0]?.nick_name || null
       }
     });
   } catch (error) {
@@ -139,7 +141,7 @@ router.post('/test-login', async function testLogin(req, res) {
 router.get('/me', authRequired, async function me(req, res) {
   try {
     await db.initializeDatabase();
-    const result = await db.query('SELECT openid, unionid, created_at, last_login_at FROM users WHERE openid = $1', [req.auth.openid]);
+    const result = await db.query('SELECT openid, unionid, nick_name, created_at, last_login_at FROM users WHERE openid = $1', [req.auth.openid]);
     if (!result.rows.length) {
       return res.status(404).json({
         error: 'User not found',
@@ -147,9 +149,16 @@ router.get('/me', authRequired, async function me(req, res) {
       });
     }
 
+    const row = result.rows[0];
     return res.json({
       success: true,
-      data: result.rows[0]
+      data: {
+        openid: row.openid,
+        unionid: row.unionid,
+        nickName: row.nick_name,
+        created_at: row.created_at,
+        last_login_at: row.last_login_at
+      }
     });
   } catch (error) {
     console.error('Auth me error:', error);
