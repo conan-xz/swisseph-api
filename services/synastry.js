@@ -267,6 +267,8 @@ function generateSynastryReport(chartAInput, chartBInput, relationType, options 
     ],
     keyAspects: crossAspects.slice(0, 8),
     houseOverlays: [],
+    personALabel: options.personALabel || 'A',
+    personBLabel: options.personBLabel || 'B',
     chartA,
     chartB
   };

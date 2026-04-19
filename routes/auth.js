@@ -7,9 +7,18 @@ const { authRequired } = require('../middleware/auth');
 
 const router = express.Router();
 
+function sanitizeNickName(raw) {
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const segments = Array.from(trimmed);
+  const limited = segments.length > 12 ? segments.slice(0, 12).join('') + '…' : trimmed;
+  return limited;
+}
+
 router.post('/login', async function login(req, res) {
   try {
-    const { code, authType = 'wechat_h5' } = req.body;
+    const { code, authType = 'wechat_h5', nickName } = req.body;
 
     if (!code) {
       return res.status(400).json({
@@ -22,16 +31,18 @@ router.post('/login', async function login(req, res) {
       ? await wechatService.codeToSession(code)
       : await wechatService.h5CodeToSession(code);
     await db.initializeDatabase();
+    const cleanNickName = sanitizeNickName(nickName);
     await db.query(
       `
-        INSERT INTO users (openid, unionid, created_at, last_login_at)
-        VALUES ($1, $2, NOW(), NOW())
+        INSERT INTO users (openid, unionid, nick_name, created_at, last_login_at)
+        VALUES ($1, $2, $3, NOW(), NOW())
         ON CONFLICT (openid)
         DO UPDATE SET
           unionid = COALESCE(EXCLUDED.unionid, users.unionid),
+          nick_name = COALESCE(EXCLUDED.nick_name, users.nick_name),
           last_login_at = NOW()
       `,
-      [authData.openid, authData.unionid || null]
+      [authData.openid, authData.unionid || null, cleanNickName]
     );
 
     const token = tokenService.issueToken({

@@ -65,9 +65,12 @@ async function initializeDatabase() {
     CREATE TABLE IF NOT EXISTS users (
       openid TEXT PRIMARY KEY,
       unionid TEXT,
+      nick_name TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       last_login_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS nick_name TEXT;
 
     CREATE TABLE IF NOT EXISTS profiles (
       id UUID PRIMARY KEY,

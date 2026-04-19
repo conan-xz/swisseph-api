@@ -97,6 +97,7 @@ function mapInviteRow(row, includeReportId) {
     acceptedAt: row.accepted_at,
     createdAt: row.created_at,
     inviterPreview: row.preview_json,
+    inviterName: row.inviter_nick_name || null,
     reportId: includeReportId ? row.report_id : null
   };
 }
@@ -143,10 +144,16 @@ router.post('/invites', authRequired, async function createInvite(req, res) {
         [inviteId, inviteCode, req.auth.openid, profileRecord.id, relationType, message]
       );
 
+      const inviterRow = await client.query(
+        'SELECT nick_name FROM users WHERE openid = $1 LIMIT 1',
+        [req.auth.openid]
+      );
+
       return {
         inviteId,
         inviteCode,
-        inviterPreview
+        inviterPreview,
+        inviterName: inviterRow.rows[0]?.nick_name || null
       };
     });
 
@@ -155,7 +162,8 @@ router.post('/invites', authRequired, async function createInvite(req, res) {
       data: {
         inviteCode: result.inviteCode,
         inviteUrl: `/pages/synastry/synastry?inviteCode=${result.inviteCode}`,
-        inviterPreview: result.inviterPreview
+        inviterPreview: result.inviterPreview,
+        inviterName: result.inviterName
       }
     });
   } catch (error) {
@@ -173,9 +181,10 @@ router.get('/invites/:code', getOptionalAuth, async function getInvite(req, res)
     await db.initializeDatabase();
     const result = await db.query(
       `
-        SELECT invites.*, profiles.preview_json
+        SELECT invites.*, profiles.preview_json, inviter_user.nick_name AS inviter_nick_name
         FROM synastry_invites AS invites
         JOIN profiles ON profiles.id = invites.inviter_profile_id
+        LEFT JOIN users AS inviter_user ON inviter_user.openid = invites.inviter_openid
         WHERE invites.invite_code = $1
         LIMIT 1
       `,
@@ -214,9 +223,13 @@ router.post('/invites/:code/accept', authRequired, async function acceptInvite(r
 
     const inviteQuery = await db.query(
       `
-        SELECT invites.*, inviter_profiles.chart_snapshot AS inviter_chart_snapshot, inviter_profiles.preview_json AS inviter_preview
+        SELECT invites.*,
+          inviter_profiles.chart_snapshot AS inviter_chart_snapshot,
+          inviter_profiles.preview_json AS inviter_preview,
+          inviter_user.nick_name AS inviter_nick_name
         FROM synastry_invites AS invites
         JOIN profiles AS inviter_profiles ON inviter_profiles.id = invites.inviter_profile_id
+        LEFT JOIN users AS inviter_user ON inviter_user.openid = invites.inviter_openid
         WHERE invites.invite_code = $1
         LIMIT 1
       `,
@@ -257,9 +270,17 @@ router.post('/invites/:code/accept', authRequired, async function acceptInvite(r
     const inviteeChart = chartService.generateBirthChart(buildChartParamsFromProfile(profile, houseSystem));
     const inviterChart = invite.inviter_chart_snapshot;
     const inviteePreview = synastryService.getPreviewFromChart(inviteeChart, profile.name || 'TA');
+
+    const accepterRow = await db.query(
+      'SELECT nick_name FROM users WHERE openid = $1 LIMIT 1',
+      [req.auth.openid]
+    );
+    const inviterName = invite.inviter_nick_name || 'A';
+    const accepterName = accepterRow.rows[0]?.nick_name || 'B';
+
     const report = synastryService.generateSynastryReport(inviterChart, inviteeChart, invite.relation_type, {
-      personALabel: 'A',
-      personBLabel: 'B',
+      personALabel: inviterName,
+      personBLabel: accepterName,
       timeKnownA: true,
       timeKnownB: !!profile.timeKnown
     });
@@ -385,9 +406,10 @@ router.get('/my/invites', authRequired, async function myInvites(req, res) {
     await db.initializeDatabase();
     const result = await db.query(
       `
-        SELECT invites.*, profiles.preview_json
+        SELECT invites.*, profiles.preview_json, inviter_user.nick_name AS inviter_nick_name
         FROM synastry_invites AS invites
         JOIN profiles ON profiles.id = invites.inviter_profile_id
+        LEFT JOIN users AS inviter_user ON inviter_user.openid = invites.inviter_openid
         WHERE invites.inviter_openid = $1
         ORDER BY invites.created_at DESC
         LIMIT 20
