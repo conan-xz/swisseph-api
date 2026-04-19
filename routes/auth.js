@@ -1,11 +1,17 @@
 const express = require('express');
 const crypto = require('crypto');
+const multer = require('multer');
 const wechatService = require('../services/wechat');
 const tokenService = require('../services/token');
+const ossService = require('../services/oss');
 const db = require('../services/db');
 const { authRequired } = require('../middleware/auth');
 
 const router = express.Router();
+const avatarUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 4 * 1024 * 1024 }
+});
 
 function sanitizeNickName(raw) {
   if (typeof raw !== 'string') return null;
@@ -14,6 +20,15 @@ function sanitizeNickName(raw) {
   const segments = Array.from(trimmed);
   const limited = segments.length > 12 ? segments.slice(0, 12).join('') + '…' : trimmed;
   return limited;
+}
+
+function signAvatar(objectKey) {
+  try {
+    return ossService.signAvatarUrl(objectKey);
+  } catch (error) {
+    console.warn('signAvatarUrl failed:', error.message);
+    return null;
+  }
 }
 
 router.post('/login', async function login(req, res) {
@@ -41,7 +56,7 @@ router.post('/login', async function login(req, res) {
           unionid = COALESCE(EXCLUDED.unionid, users.unionid),
           nick_name = COALESCE(EXCLUDED.nick_name, users.nick_name),
           last_login_at = NOW()
-        RETURNING nick_name
+        RETURNING nick_name, avatar_object_key
       `,
       [authData.openid, authData.unionid || null, cleanNickName]
     );
@@ -52,17 +67,76 @@ router.post('/login', async function login(req, res) {
       jti: crypto.randomUUID()
     });
 
+    const row = upsertResult.rows[0] || {};
     return res.json({
       success: true,
       data: {
         token,
         openid: authData.openid,
         unionid: authData.unionid || null,
-        nickName: upsertResult.rows[0]?.nick_name || null
+        nickName: row.nick_name || null,
+        avatarUrl: signAvatar(row.avatar_object_key)
       }
     });
   } catch (error) {
     console.error('Auth login error:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+      message: error.message,
+      code: 'INTERNAL_ERROR'
+    });
+  }
+});
+
+router.post('/mini-profile', avatarUpload.single('avatar'), async function miniProfile(req, res) {
+  try {
+    const { code, nickName } = req.body || {};
+    if (!code) {
+      return res.status(400).json({
+        error: 'code is required',
+        code: 'INVALID_PARAM'
+      });
+    }
+    if (!req.file || !req.file.buffer) {
+      return res.status(400).json({
+        error: 'avatar file is required',
+        code: 'AVATAR_REQUIRED'
+      });
+    }
+
+    const authData = await wechatService.codeToSession(code);
+    await db.initializeDatabase();
+
+    const objectKey = await ossService.uploadAvatar(authData.openid, req.file.buffer, {
+      mimetype: req.file.mimetype,
+      originalname: req.file.originalname
+    });
+
+    const cleanNickName = sanitizeNickName(nickName);
+    await db.query(
+      `
+        INSERT INTO users (openid, unionid, nick_name, avatar_object_key, created_at, last_login_at)
+        VALUES ($1, $2, $3, $4, NOW(), NOW())
+        ON CONFLICT (openid)
+        DO UPDATE SET
+          unionid = COALESCE(EXCLUDED.unionid, users.unionid),
+          nick_name = COALESCE(EXCLUDED.nick_name, users.nick_name),
+          avatar_object_key = EXCLUDED.avatar_object_key,
+          last_login_at = NOW()
+      `,
+      [authData.openid, authData.unionid || null, cleanNickName, objectKey]
+    );
+
+    return res.json({
+      success: true,
+      data: {
+        openid: authData.openid,
+        avatarObjectKey: objectKey,
+        avatarUrl: signAvatar(objectKey)
+      }
+    });
+  } catch (error) {
+    console.error('Mini profile error:', error);
     return res.status(500).json({
       error: 'Internal server error',
       message: error.message,
@@ -141,7 +215,10 @@ router.post('/test-login', async function testLogin(req, res) {
 router.get('/me', authRequired, async function me(req, res) {
   try {
     await db.initializeDatabase();
-    const result = await db.query('SELECT openid, unionid, nick_name, created_at, last_login_at FROM users WHERE openid = $1', [req.auth.openid]);
+    const result = await db.query(
+      'SELECT openid, unionid, nick_name, avatar_object_key, created_at, last_login_at FROM users WHERE openid = $1',
+      [req.auth.openid]
+    );
     if (!result.rows.length) {
       return res.status(404).json({
         error: 'User not found',
@@ -156,6 +233,7 @@ router.get('/me', authRequired, async function me(req, res) {
         openid: row.openid,
         unionid: row.unionid,
         nickName: row.nick_name,
+        avatarUrl: signAvatar(row.avatar_object_key),
         created_at: row.created_at,
         last_login_at: row.last_login_at
       }

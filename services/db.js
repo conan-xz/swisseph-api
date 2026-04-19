@@ -71,6 +71,7 @@ async function initializeDatabase() {
     );
 
     ALTER TABLE users ADD COLUMN IF NOT EXISTS nick_name TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_object_key TEXT;
 
     CREATE TABLE IF NOT EXISTS profiles (
       id UUID PRIMARY KEY,
