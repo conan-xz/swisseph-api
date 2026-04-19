@@ -13,10 +13,13 @@ const avatarUpload = multer({
   limits: { fileSize: 4 * 1024 * 1024 }
 });
 
+const BANNED_NICKNAMES = new Set(['微信用户', '微信号', '新用户', '用户']);
+
 function sanitizeNickName(raw) {
   if (typeof raw !== 'string') return null;
   const trimmed = raw.trim();
   if (!trimmed) return null;
+  if (BANNED_NICKNAMES.has(trimmed)) return null;
   const segments = Array.from(trimmed);
   const limited = segments.length > 12 ? segments.slice(0, 12).join('') + '…' : trimmed;
   return limited;
@@ -104,6 +107,14 @@ router.post('/mini-profile', avatarUpload.single('avatar'), async function miniP
       });
     }
 
+    const cleanNickName = sanitizeNickName(nickName);
+    if (!cleanNickName) {
+      return res.status(400).json({
+        error: 'nickName is required and must not be a default name',
+        code: 'INVALID_NICKNAME'
+      });
+    }
+
     const authData = await wechatService.codeToSession(code);
     await db.initializeDatabase();
 
@@ -111,8 +122,6 @@ router.post('/mini-profile', avatarUpload.single('avatar'), async function miniP
       mimetype: req.file.mimetype,
       originalname: req.file.originalname
     });
-
-    const cleanNickName = sanitizeNickName(nickName);
     await db.query(
       `
         INSERT INTO users (openid, unionid, nick_name, avatar_object_key, created_at, last_login_at)
