@@ -275,8 +275,8 @@ router.post('/invites/:code/accept', authRequired, async function acceptInvite(r
       'SELECT nick_name FROM users WHERE openid = $1 LIMIT 1',
       [req.auth.openid]
     );
-    const inviterName = invite.inviter_nick_name || 'A';
-    const accepterName = accepterRow.rows[0]?.nick_name || 'B';
+    const inviterName = invite.inviter_nick_name ? `${invite.inviter_nick_name}|` : 'A';
+    const accepterName = accepterRow.rows[0]?.nick_name ? `${accepterRow.rows[0].nick_name}|` : 'B';
 
     const report = synastryService.generateSynastryReport(inviterChart, inviteeChart, invite.relation_type, {
       personALabel: inviterName,
