@@ -36,7 +36,7 @@ function signAvatar(objectKey) {
 
 router.post('/login', async function login(req, res) {
   try {
-    const { code, authType = 'wechat_h5', nickName } = req.body;
+    const { code, authType = 'wechat_h5' } = req.body;
 
     if (!code) {
       return res.status(400).json({
@@ -49,19 +49,16 @@ router.post('/login', async function login(req, res) {
       ? await wechatService.codeToSession(code)
       : await wechatService.h5CodeToSession(code);
     await db.initializeDatabase();
-    const cleanNickName = sanitizeNickName(nickName);
-    const upsertResult = await db.query(
+    await db.query(
       `
-        INSERT INTO users (openid, unionid, nick_name, created_at, last_login_at)
-        VALUES ($1, $2, $3, NOW(), NOW())
+        INSERT INTO users (openid, unionid, created_at, last_login_at)
+        VALUES ($1, $2, NOW(), NOW())
         ON CONFLICT (openid)
         DO UPDATE SET
           unionid = COALESCE(EXCLUDED.unionid, users.unionid),
-          nick_name = COALESCE(EXCLUDED.nick_name, users.nick_name),
           last_login_at = NOW()
-        RETURNING nick_name, avatar_object_key
       `,
-      [authData.openid, authData.unionid || null, cleanNickName]
+      [authData.openid, authData.unionid || null]
     );
 
     const token = tokenService.issueToken({
@@ -70,15 +67,12 @@ router.post('/login', async function login(req, res) {
       jti: crypto.randomUUID()
     });
 
-    const row = upsertResult.rows[0] || {};
     return res.json({
       success: true,
       data: {
         token,
         openid: authData.openid,
-        unionid: authData.unionid || null,
-        nickName: row.nick_name || null,
-        avatarUrl: signAvatar(row.avatar_object_key)
+        unionid: authData.unionid || null
       }
     });
   } catch (error) {

@@ -7,6 +7,7 @@ var bodyParser = require ('body-parser');
 
 var routes = require ('./routes/index');
 var authRoutes = require('./routes/auth');
+var userRoutes = require('./routes/user');
 var synastryRoutes = require('./routes/synastry');
 
 var app = express ();
@@ -47,6 +48,7 @@ app.use (express.static (path.join (__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/synastry', synastryRoutes);
 
 // catch 404 and forward to error handler
